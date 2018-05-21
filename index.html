@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Web 3 JS Tutorial</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.js" ></script>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="text-center">Coursetro Instructor</h1>
+  <h2 id="instructor"></h2>
+    <img id="loader" style="display: none; width: 16%" src="https://78.media.tumblr.com/a6177f6b977637597850b273022c81ed/tumblr_nurhzkuKQO1syz1nro1_500.gif">
+ 
+    <div class="form-group">
+      <label for="name" class="col-lg-2">Instructor Name</label>
+      <input type="text" class="form-control"  id="name">
+    </div>
+    <div class="form-group">
+      <label for="name" class="col-lg-2">Instructor Age</label>
+      <input type="text" class="form-control"  id="age">
+    </div>
+    
+    <button type="submit" class="btn btn-default" id="button">Submit</button>
+  
+</div>
+
+</body>
+    <script>
+        if(typeof web3 !== 'undefined'){
+            web3 = new Web3(web3.currentProvider)
+            
+        }else{
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        }
+        
+        web3.eth.defaultAccount = web3.eth.accounts[1];
+        
+        var CoursetroContract = web3.eth.contract([
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "fname",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"name": "age",
+				"type": "uint256"
+			}
+		],
+		"name": "Instructor",
+		"type": "event"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_fname",
+				"type": "string"
+			},
+			{
+				"name": "_age",
+				"type": "uint256"
+			}
+		],
+		"name": "setInstructor",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getInstructor",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+])
+        
+        var Coursetro = CoursetroContract.at('0x7d6846731017a05e004a70f892d05b84c4d102a2');
+        // console.log(Coursetro);
+        
+        var instructorEvent =Coursetro.Instructor();
+        
+        instructorEvent.watch(function(error, result){
+           if(!error) {
+               $("#loader").hide();
+               $("#instructor").html(result.args.fname +' ('+result.args.age+' years old )');
+           }else{
+               $("#loader").hide();
+               console.log(error);
+           }
+        });
+        
+        $("#button").click(function(){
+            Coursetro.setInstructor($("#name").val(), $("#age").val());
+            $("#loader").show();
+            
+        })
+    </script>
+</html>
